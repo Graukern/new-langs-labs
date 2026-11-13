@@ -1,8 +1,8 @@
 grid = [
-    ['1', '1', '0', '0'],
-    ['1', '0', '0', '1'],
-    ['0', '0', '1', '1'],
-    ['0', '0', '0', '0']
+    '1' '1' '0' '0';
+    '1' '0' '0' '1';
+    '0' '0' '1' '1';
+    '0' '0' '0' '0'
 ]
 
 function visit_island!(grid, row, column)
@@ -20,12 +20,15 @@ function visit_island!(grid, row, column)
     visit_island!(grid, row, column - 1)
 end
 
-islands = 0
-for row in axes(grid, 1), column in axes(grid, 2)
-    if grid[row, column] == '1'
-        islands += 1
-        visit_island!(grid, row, column)
+function count_islands(grid)
+    islands = 0
+    for row in axes(grid, 1), column in axes(grid, 2)
+        if grid[row, column] == '1'
+            islands += 1
+            visit_island!(grid, row, column)
+        end
     end
+    return islands
 end
 
-println("Островов: ", islands)
+println("Островов: ", count_islands(grid))
