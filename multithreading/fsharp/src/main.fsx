@@ -1,19 +1,38 @@
 open System
 open System.Threading.Tasks
 
-let values =
+let upperLimit =
     match fsi.CommandLineArgs |> Array.tail with
-    | [||] -> [| "first"; "second"; "third"; "fourth" |]
-    | args -> args
+    | [||] -> 200000
+    | [| value |] ->
+        match Int32.TryParse(value) with
+        | true, number when number > 1 -> number
+        | _ -> failwith "Верхняя граница должна быть целым числом больше 1."
+    | _ -> failwith "Использование: dotnet fsi src/main.fsx [верхняя-граница]"
+
+let isPrime number =
+    if number < 2 then false
+    else
+        let limit = int (sqrt (float number))
+        [ 2 .. limit ]
+        |> List.exists (fun divisor -> number % divisor = 0)
+        |> not
+
+let ranges =
+    [| 1, upperLimit / 4
+       upperLimit / 4 + 1, upperLimit / 2
+       upperLimit / 2 + 1, upperLimit * 3 / 4
+       upperLimit * 3 / 4 + 1, upperLimit |]
 
 let jobs =
-    values
-    |> Array.map (fun value ->
-        Task.Run(fun () -> value, value.Length))
+    ranges
+    |> Array.map (fun (first, last) ->
+        Task.Run(fun () ->
+            let count = [ first .. last ] |> List.filter isPrime |> List.length
+            first, last, count))
 
-let total =
-    jobs
-    |> Array.sumBy (fun job -> snd job.Result)
+let results = jobs |> Array.map (fun job -> job.Result)
+results |> Array.iter (fun (first, last, count) ->
+    printfn "Диапазон %d-%d: простых чисел: %d" first last count)
 
-printfn "Элементов: %d" values.Length
-printfn "Общая длина: %d" total
+printfn "Всего простых чисел: %d" (results |> Array.sumBy (fun (_, _, count) -> count))
