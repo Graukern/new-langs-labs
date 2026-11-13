@@ -1,0 +1,23 @@
+# Результаты сборки
+*.o
+*.obj
+*.hi
+*.jar
+*.class
+*.exe
+out/
+.zig-cache/
+zig-cache/
+zig-out/
+
+# Собранные программы (имена из команд запуска в README)
+multithreading/ada/main
+multithreading/ada/*.ali
+multithreading/d/main
+algorithms/kotlin/main.jar
+client-server/nim/server
+client-server/rust/server
+client-server/swift/server
+client-server/objective-c/client
+data-conversion/odin/main
+
