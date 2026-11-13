@@ -13,6 +13,7 @@ zig-out/
 # Собранные программы (имена из команд запуска в README)
 multithreading/ada/main
 multithreading/ada/*.ali
+multithreading/ada/b~*
 multithreading/d/main
 algorithms/kotlin/main.jar
 client-server/nim/server
