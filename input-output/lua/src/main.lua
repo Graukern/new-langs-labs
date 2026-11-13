@@ -1,5 +1,5 @@
 if #arg < 2 then
-    io.stderr:write("Использование: lua5.4 main.lua ФАЙЛ add ТЕКСТ\n")
+    io.stderr:write("Использование: lua5.4 main.lua ФАЙЛ add ТЕКСТ | list\n")
     os.exit(1)
 end
 
