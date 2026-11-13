@@ -27,7 +27,10 @@ fn handle_client(mut stream: TcpStream) {
         }
     };
 
-    let response = format!("{}\n", number * number);
+    let response = match number.checked_mul(number) {
+        Some(value) => format!("{value}\n"),
+        None => "Ошибка: квадрат числа не помещается в i64\n".to_string(),
+    };
     if let Err(error) = stream.write_all(response.as_bytes()) {
         eprintln!("Ошибка отправки: {error}");
     }

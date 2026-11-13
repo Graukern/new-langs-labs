@@ -40,13 +40,17 @@ guard let port = Int(arguments[2]) else {
 
 if mode == "server" {
     let server = socket(AF_INET, Int32(SOCK_STREAM.rawValue), 0)
+    guard server >= 0 else {
+        fputs("Не удалось создать серверный сокет\n", stderr)
+        exit(1)
+    }
     var address = makeAddress(host: host, port: port)
     let bindResult = withUnsafePointer(to: &address) {
         $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
             bind(server, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
         }
     }
-    guard server >= 0, bindResult == 0, listen(server, 1) == 0 else {
+    guard bindResult == 0, listen(server, 1) == 0 else {
         fputs("Не удалось запустить сервер\n", stderr)
         exit(1)
     }

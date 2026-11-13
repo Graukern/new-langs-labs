@@ -1,10 +1,9 @@
-local output_path = arg[1] or "sample/notes.txt"
-
 if #arg < 2 then
     io.stderr:write("Нужно передать имя файла и хотя бы одну заметку\n")
     os.exit(1)
 end
 
+local output_path = arg[1]
 local file, error_message = io.open(output_path, "a")
 if not file then
     io.stderr:write("Не удалось открыть файл: " .. error_message .. "\n")

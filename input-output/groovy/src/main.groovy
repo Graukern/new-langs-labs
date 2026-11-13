@@ -8,7 +8,7 @@ if (!file.isFile()) {
 
 def text = file.getText("UTF-8")
 def lines = text ? text.readLines().size() : 0
-def words = text ? text.split(/\s+/).size() : 0
+def words = text.trim() ? text.trim().split(/\s+/).size() : 0
 
 println "Строк: ${lines}"
 println "Слов: ${words}"
