@@ -15,14 +15,14 @@ if mode == "server":
   server.listen()
   echo "Сервер слушает ", host, ":", port
 
-  var client = newSocket()
-  var address = ""
-  server.acceptAddr(client, address)
-  echo "Подключение: ", address
-  let message = client.recvLine()
-  client.send(message & "\n")
-  client.close()
-  server.close()
+  while true:
+    var client = newSocket()
+    var address = ""
+    server.acceptAddr(client, address)
+    echo "Подключение: ", address
+    let message = client.recvLine()
+    client.send(message & "\n")
+    client.close()
 elif mode == "client":
   if paramCount() < 4:
     quit("Для клиента нужно передать сообщение", 1)
