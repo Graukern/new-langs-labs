@@ -5,5 +5,5 @@
 ## Запуск
 
 ```bash
-ruby src/main.rb sample/source.txt sample/copy.txt
+ruby src/main.rb sample/source.txt /tmp/copy.txt
 ```
