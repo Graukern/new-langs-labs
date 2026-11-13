@@ -56,13 +56,14 @@ if mode == "server" {
     }
 
     print("Сервер слушает \(host):\(port)")
-    let client = accept(server, nil, nil)
-    if client >= 0 {
-        let message = receiveMessage(socket: client).trimmingCharacters(in: .whitespacesAndNewlines)
-        sendMessage(socket: client, message: "Получено: \(message)")
-        close(client)
+    while true {
+        let client = accept(server, nil, nil)
+        if client >= 0 {
+            let message = receiveMessage(socket: client).trimmingCharacters(in: .whitespacesAndNewlines)
+            sendMessage(socket: client, message: "Получено: \(message)")
+            close(client)
+        }
     }
-    close(server)
 } else if mode == "client" && arguments.count >= 4 {
     let client = socket(AF_INET, Int32(SOCK_STREAM.rawValue), 0)
     var address = makeAddress(host: host, port: port)
