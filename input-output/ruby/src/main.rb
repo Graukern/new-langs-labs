@@ -10,9 +10,12 @@ unless File.file?(source_path)
   exit 1
 end
 
-File.binwrite(target_path, File.binread(source_path))
+count = 0
+File.open(target_path, "w", encoding: "UTF-8") do |target|
+  File.foreach(source_path, encoding: "UTF-8") do |line|
+    count += 1
+    target.puts "#{count}. #{line.chomp}"
+  end
+end
 
-source_size = File.size(source_path)
-target_size = File.size(target_path)
-puts "Размер исходного файла: #{source_size}"
-puts "Размер копии: #{target_size}"
+puts "Скопировано строк: #{count}"
