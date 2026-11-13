@@ -2,7 +2,7 @@ fun climbStairs n =
     let
         val cache = Array.array (n + 1, ~1)
         fun calculate value =
-            if value <= 1 then value
+            if value <= 1 then 1
             else
                 let
                     val saved = Array.sub (cache, value)
@@ -21,3 +21,4 @@ fun climbStairs n =
     end
 
 val _ = print ("Вариантов для 5 ступеней: " ^ Int.toString (climbStairs 5) ^ "\n")
+val _ = OS.Process.exit OS.Process.success
