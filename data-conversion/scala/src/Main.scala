@@ -1,9 +1,18 @@
 import scala.io.Source
 
 object Main {
+  def escapeXml(value: String): String =
+    value
+      .replace("&", "&amp;")
+      .replace("<", "&lt;")
+      .replace(">", "&gt;")
+      .replace("\"", "&quot;")
+      .replace("'", "&apos;")
+
   def main(args: Array[String]): Unit = {
     val path = if (args.nonEmpty) args(0) else "sample/students.csv"
-    val lines = Source.fromFile(path).getLines().toList
+    val source = Source.fromFile(path)
+    val lines = try source.getLines().toList finally source.close()
 
     if (lines.isEmpty) {
       Console.err.println("CSV-файл пустой")
@@ -17,7 +26,7 @@ object Main {
     rows.foreach { row =>
       println("  <student>")
       headers.zip(row).foreach { case (header, value) =>
-        println(s"    <$header>${scala.xml.Utility.escape(value)}</$header>")
+        println(s"    <$header>${escapeXml(value)}</$header>")
       }
       println("  </student>")
     }

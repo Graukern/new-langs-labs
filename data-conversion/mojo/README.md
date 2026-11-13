@@ -1,6 +1,6 @@
 # Конвертация CSV в таблицу на Mojo
 
-Программа читает CSV-файл и печатает его в виде простой таблицы.
+Программа берёт несколько CSV-строк и печатает их в виде простой таблицы.
 
 ## Установка Mojo
 
@@ -12,5 +12,7 @@ toolchain по инструкции: <https://docs.modular.com/mojo/manual/get-s
 Из этой папки:
 
 ```bash
-mojo run src/main.mojo
+uv run --with mojo mojo run src/main.mojo
 ```
+
+Проверено на Mojo 1.2.0.

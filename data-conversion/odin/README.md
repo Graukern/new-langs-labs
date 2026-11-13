@@ -6,8 +6,7 @@
 ## Запуск
 
 ```bash
-odin run src/main.odin -- sample/config.txt
+odin run src/main.odin -file -- sample/config.txt
 ```
 
-В текущем образе Ubuntu пакет Odin может долго собирать стандартную библиотеку
-при первом запуске. После сборки результатом будет JSON-подобный объект.
+Нужен официальный компилятор Odin, а не пакет Ubuntu с таким же именем.

@@ -11,28 +11,31 @@ main :: proc() {
 		path = args[1]
 	}
 
-	data, ok := os.read_entire_file(path)
-	if !ok {
-		fmt.eprintln("Не удалось прочитать файл: ", path)
+	data, err := os.read_entire_file_from_path(path, context.allocator)
+	if err != nil {
+		fmt.eprintln("Не удалось прочитать файл: ", path, ": ", err)
 		return
 	}
 
 	fmt.println("{")
 	lines := strings.split(string(data), "\n")
-	for index, line in lines {
+	first := true
+	for line in lines {
 		trimmed := strings.trim_space(line)
 		if trimmed == "" {
 			continue
 		}
-		parts := strings.split(trimmed, "=")
+		parts := strings.split_n(trimmed, "=", 2)
 		if len(parts) != 2 {
 			continue
 		}
-		comma := if index < len(lines) - 1 { "," } else { "" }
-		fmt.printf("  \"%s\": \"%s\"%s\n",
+		if !first {
+			fmt.println(",")
+		}
+		first = false
+		fmt.printf("  \"%s\": \"%s\"",
 			strings.trim_space(parts[0]),
-			strings.trim_space(parts[1]),
-			comma)
+			strings.trim_space(parts[1]))
 	}
 	fmt.println("}")
 }
