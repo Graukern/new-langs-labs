@@ -1,13 +1,14 @@
+import std.algorithm : map;
 import std.conv;
 import std.datetime.stopwatch;
-import std.format;
+import std.math : sqrt;
 import std.parallelism;
+import std.range : iota;
 import std.stdio;
-import std.string;
 
 void main(string[] args)
 {
-    int count = 1_000_000;
+    int count = 50_000_000;
     if (args.length > 2) {
         writeln("Использование: main [верхняя-граница]");
         return;
@@ -25,29 +26,23 @@ void main(string[] args)
         return;
     }
 
-    auto values = new long[count];
-    foreach (i; 0 .. count) {
-        values[i] = i + 1;
-    }
-
     StopWatch sequentialWatch;
     sequentialWatch.start();
-    long sequentialTotal = 0;
-    foreach (value; values) {
-        sequentialTotal += value * value;
+    double sequentialTotal = 0;
+    foreach (value; 1 .. count + 1) {
+        sequentialTotal += sqrt(cast(double) value);
     }
     sequentialWatch.stop();
 
     StopWatch parallelWatch;
     parallelWatch.start();
-    long parallelTotal = 0;
-    foreach (square; taskPool.amap!((long value) => value * value)(values)) {
-        parallelTotal += square;
-    }
+    double parallelTotal = taskPool.reduce!"a + b"(
+        0.0, iota(1, count + 1).map!(value => sqrt(cast(double) value)));
     parallelWatch.stop();
 
-    writeln("Последовательно: ", sequentialTotal, " за ",
-        sequentialWatch.peek.total!"msecs", " мс");
-    writeln("Параллельно: ", parallelTotal, " за ",
-        parallelWatch.peek.total!"msecs", " мс");
+    writeln("Потоков в пуле: ", taskPool.size + 1);
+    writefln("Последовательно: %.0f за %d мс",
+        sequentialTotal, sequentialWatch.peek.total!"msecs");
+    writefln("Параллельно: %.0f за %d мс",
+        parallelTotal, parallelWatch.peek.total!"msecs");
 }
