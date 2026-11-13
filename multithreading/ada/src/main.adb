@@ -1,5 +1,6 @@
 with Ada.Command_Line;
 with Ada.Text_IO;
+with Ada.Exceptions;
 
 procedure Main is
    Worker_Count : constant Positive := 4;
@@ -43,15 +44,22 @@ procedure Main is
    Shared_Result : aliased Accumulator;
 begin
    if Ada.Command_Line.Argument_Count = 1 then
-      Limit := Positive'Value (Ada.Command_Line.Argument (1));
+      begin
+         Limit := Positive'Value (Ada.Command_Line.Argument (1));
+      exception
+         when Constraint_Error =>
+            Ada.Text_IO.Put_Line ("Верхняя граница должна быть положительным числом.");
+            Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
+            return;
+      end;
    elsif Ada.Command_Line.Argument_Count > 1 then
-      Ada.Text_IO.Put_Line ("Usage: main [positive-limit]");
+      Ada.Text_IO.Put_Line ("Использование: main [положительная-граница]");
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
       return;
    end if;
 
    if Limit < Worker_Count then
-      Ada.Text_IO.Put_Line ("The limit must be at least 4.");
+      Ada.Text_IO.Put_Line ("Верхняя граница должна быть не меньше 4.");
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
       return;
    end if;
@@ -67,6 +75,6 @@ begin
    end;
 
    Ada.Text_IO.Put_Line
-     ("Sum of squares from 1 to" & Positive'Image (Limit) & ":"
+     ("Сумма квадратов от 1 до" & Positive'Image (Limit) & ":"
       & Number_Type'Image (Shared_Result.Total));
 end Main;

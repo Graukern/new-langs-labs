@@ -7,10 +7,20 @@ import std.string;
 void main(string[] args)
 {
     int count = 100;
-    if (args.length == 2) {
-        count = to!int(args[1]);
-    } else if (args.length > 2 || count < 1) {
+    if (args.length > 2) {
         writeln("Использование: main [количество-строк]");
+        return;
+    }
+    if (args.length == 2) {
+        try {
+            count = to!int(args[1]);
+        } catch (ConvException) {
+            writeln("Количество строк должно быть целым числом.");
+            return;
+        }
+    }
+    if (count < 1) {
+        writeln("Количество строк должно быть положительным.");
         return;
     }
 

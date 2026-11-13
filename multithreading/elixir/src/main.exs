@@ -22,7 +22,11 @@ end
 limit =
   case System.argv() do
     [] -> 10
-    [value] -> String.to_integer(value)
+    [value] ->
+      case Integer.parse(value) do
+        {number, ""} -> number
+        _ -> 0
+      end
     _ -> 0
   end
 
