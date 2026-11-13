@@ -11,7 +11,7 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     val path = if (args.nonEmpty) args(0) else "sample/students.csv"
-    val source = Source.fromFile(path)
+    val source = Source.fromFile(path, "UTF-8")
     val lines = try source.getLines().toList finally source.close()
 
     if (lines.isEmpty) {

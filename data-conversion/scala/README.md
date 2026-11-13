@@ -13,3 +13,4 @@ scala -nocompdaemon -cp out Main sample/students.csv
 Результат печатается в консоль.
 
 Поддерживается простой CSV без запятых внутри кавычек.
+Проверено на Scala 2.11.12.

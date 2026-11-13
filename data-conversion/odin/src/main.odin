@@ -13,7 +13,7 @@ main :: proc() {
 
 	data, err := os.read_entire_file_from_path(path, context.allocator)
 	if err != nil {
-		fmt.eprintln("Не удалось прочитать файл: ", path, ": ", err)
+		fmt.eprintfln("Не удалось прочитать файл %s: %v", path, err)
 		return
 	}
 
@@ -37,5 +37,6 @@ main :: proc() {
 			strings.trim_space(parts[0]),
 			strings.trim_space(parts[1]))
 	}
+	fmt.println()
 	fmt.println("}")
 }
