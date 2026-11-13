@@ -1,6 +1,5 @@
 with Ada.Command_Line;
 with Ada.Text_IO;
-with Ada.Exceptions;
 
 procedure Main is
    Worker_Count : constant Positive := 4;
