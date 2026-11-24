@@ -1,35 +1,86 @@
-import net
-import os
-import strutils
+import algorithm, net, os, strutils
 
-if paramCount() < 1:
-  quit("Использование: server|client [host] [port] [сообщение]", 1)
+proc middleAverage(left, right: BiggestInt): string =
+  var whole = left div 2 + right div 2
+  let remainder = left mod 2 + right mod 2
+  whole += remainder div 2
+  if remainder mod 2 == 0:
+    return $whole
+  if remainder > 0:
+    if whole < 0:
+      if whole == -1: return "-0.5"
+      return $(whole + 1) & ".5"
+    return $whole & ".5"
+  if whole > 0:
+    return $(whole - 1) & ".5"
+  if whole == 0: return "-0.5"
+  return $whole & ".5"
 
-let mode = paramStr(1)
-let host = if paramCount() >= 2: paramStr(2) else: "127.0.0.1"
-let port = if paramCount() >= 3: Port(parseInt(paramStr(3))) else: Port(9000)
-
-if mode == "server":
-  let server = newSocket()
-  server.bindAddr(port, host)
-  server.listen()
-  echo "Сервер слушает ", host, ":", port
-
+proc serve(client: Socket) =
+  var values: seq[BiggestInt]
   while true:
-    var client = newSocket()
-    var address = ""
-    server.acceptAddr(client, address)
-    echo "Подключение: ", address
-    let message = client.recvLine()
-    client.send(message & "\n")
-    client.close()
-elif mode == "client":
-  if paramCount() < 4:
-    quit("Для клиента нужно передать сообщение", 1)
-  let client = newSocket()
-  client.connect(host, port)
-  client.send(paramStr(4) & "\n")
-  echo "Ответ сервера: ", client.recvLine()
-  client.close()
-else:
-  quit("Неизвестный режим: " & mode, 1)
+    let line = client.recvLine()
+    if line.len == 0:
+      break
+    let parts = line.splitWhitespace()
+    var response = "ERROR: ожидалась команда ADD <число> или MEDIAN"
+    if parts.len == 2 and parts[0] == "ADD":
+      try:
+        values.add(parseBiggestInt(parts[1]))
+        response = "OK"
+      except ValueError:
+        response = "ERROR: ожидалось целое число"
+    elif parts == @["MEDIAN"]:
+      if values.len == 0:
+        response = "ERROR: список пуст"
+      else:
+        values.sort()
+        let middle = values.len div 2
+        if values.len mod 2 == 0:
+          response = middleAverage(values[middle - 1], values[middle])
+        else:
+          response = $values[middle]
+    client.send(response & "\n")
+
+proc main() =
+  if paramCount() < 3:
+    quit("Использование: server|client АДРЕС ПОРТ [КОМАНДЫ...]", 1)
+  let mode = paramStr(1)
+  let host = paramStr(2)
+  let port = parseInt(paramStr(3))
+  if port notin 1..65535:
+    quit("Порт должен быть в диапазоне 1–65535", 1)
+
+  if mode == "server" and paramCount() == 3:
+    let server = newSocket()
+    defer: server.close()
+    server.setSockOpt(OptReuseAddr, true)
+    server.bindAddr(Port(port), host)
+    server.listen()
+    echo "Сервер слушает ", host, ":", port
+    while true:
+      var client: Socket
+      server.accept(client)
+      try:
+        serve(client)
+      except OSError:
+        stderr.writeLine("Подключение прервано")
+      finally:
+        client.close()
+  elif mode == "client" and paramCount() >= 4:
+    let client = newSocket()
+    defer: client.close()
+    client.connect(host, Port(port))
+    for index in 4..paramCount():
+      client.send(paramStr(index) & "\n")
+      let reply = client.recvLine()
+      if reply.len == 0:
+        quit("Сервер закрыл подключение", 1)
+      echo reply
+  else:
+    quit("Неверные аргументы", 1)
+
+try:
+  main()
+except ValueError, OSError:
+  quit(getCurrentExceptionMsg(), 1)
