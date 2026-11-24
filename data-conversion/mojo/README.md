@@ -1,18 +1,14 @@
-# Конвертация CSV в таблицу на Mojo
+# Конвертация PO в JSON на Mojo
 
-Программа читает CSV-файл и печатает его в виде Markdown-таблицы.
-
-## Установка Mojo
-
-Mojo не входит в стандартные пакеты Ubuntu. Установите официальный Modular
-toolchain по инструкции: <https://docs.modular.com/mojo/manual/get-started/>.
+Конвертер читает PO в UTF-8 и записывает JSON-объект из пар `msgid` и
+`msgstr`. Он объединяет строки продолжения и сохраняет кавычки и переносы
+строк в переводе. Поддерживаются обычные записи без контекста и множественных форм.
 
 ## Запуск
 
-Из этой папки:
+Из этой папки с установленным `uv`:
 
 ```bash
-uv run --with mojo mojo run src/main.mojo
+uv run --with mojo==1.2.0 mojo run src/main.mojo sample/messages.po /tmp/messages.json
+cat /tmp/messages.json
 ```
-
-Проверено на Mojo 1.2.0.
