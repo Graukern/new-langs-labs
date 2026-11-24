@@ -1,29 +1,23 @@
-# HTTP-клиент на Objective-C
+# HTTP-клиент для расчёта корзины на Objective-C
 
-Программа отправляет GET-запрос по указанному адресу и печатает полученный
-текст. Программа реализует клиента, а сервером для проверки служит
-`python3 -m http.server`.
+Клиент читает корзину из файла JSON и отправляет её запросом
+`POST /checkout`. Тестовый сервер считает стоимость по ценам в копейках
+и количеству товаров. Клиент выводит поле `total_kopecks` из ответа.
 
 ## Запуск
 
-Команды рассчитаны на WSL (Ubuntu). Если инструменты ещё не установлены:
+В первом терминале WSL (Ubuntu) из этой папки:
 
 ```bash
-sudo apt install clang gcc libgnustep-base-dev python3
+python3 sample/server.py
 ```
 
-В первом терминале из папки `client-server/objective-c`:
+Во втором терминале из этой же папки:
 
 ```bash
-python3 -m http.server 9100 --bind 127.0.0.1
+clang $(gnustep-config --objc-flags) -I"$(gcc -print-file-name=include)" src/main.m -o /tmp/checkout-client $(gnustep-config --base-libs)
+/tmp/checkout-client http://127.0.0.1:9100/checkout sample/basket.json
 ```
 
-Во втором терминале из той же папки:
-
-```bash
-clang $(gnustep-config --objc-flags) -I"$(gcc -print-file-name=include)" \
-  src/main.m -o client $(gnustep-config --base-libs)
-./client http://127.0.0.1:9100/README.md
-```
-
-Флаг `-I` добавляет путь к заголовкам Objective-C из GCC, включая `objc/objc.h`.
+Для сборки нужны `clang`, `gcc` и `libgnustep-base-dev`. Результат
+для примера — «Итого: 530 коп.».
