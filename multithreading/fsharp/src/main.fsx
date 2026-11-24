@@ -1,38 +1,42 @@
 open System
+open System.Globalization
+open System.IO
 open System.Threading.Tasks
 
-let upperLimit =
-    match fsi.CommandLineArgs |> Array.tail with
-    | [||] -> 200000
-    | [| value |] ->
-        match Int32.TryParse(value) with
-        | true, number when number > 1 -> number
-        | _ -> failwith "Верхняя граница должна быть целым числом больше 1."
-    | _ -> failwith "Использование: dotnet fsi src/main.fsx [верхняя-граница]"
+let summarize (path: string) =
+    let name = Path.GetFileName(path)
+    try
+        let temperatures =
+            File.ReadLines(path)
+            |> Seq.mapi (fun index line ->
+                match Int32.TryParse(line, NumberStyles.Integer, CultureInfo.InvariantCulture) with
+                | true, temperature -> temperature
+                | false, _ -> failwithf "некорректное показание в строке %d" (index + 1))
+            |> Seq.toArray
 
-let isPrime number =
-    if number < 2 then false
-    else
-        let limit = int (sqrt (float number))
-        [ 2 .. limit ]
-        |> List.exists (fun divisor -> number % divisor = 0)
-        |> not
+        if Array.isEmpty temperatures then
+            Error (sprintf "%s: файл пуст" name)
+        else
+            let average = temperatures |> Array.averageBy float
+            Ok (sprintf "%s: показаний %d, минимум %d, максимум %d, средняя %.2f °C"
+                    name temperatures.Length (Array.min temperatures)
+                    (Array.max temperatures) average)
+    with error ->
+        Error (sprintf "%s: %s" name error.Message)
 
-let ranges =
-    [| 1, upperLimit / 4
-       upperLimit / 4 + 1, upperLimit / 2
-       upperLimit / 2 + 1, upperLimit * 3 / 4
-       upperLimit * 3 / 4 + 1, upperLimit |]
+let paths = fsi.CommandLineArgs |> Array.skip 1
+if paths.Length < 2 then
+    eprintfn "Использование: dotnet fsi src/main.fsx ФАЙЛ1 ФАЙЛ2 [ФАЙЛЫ...]"
+    exit 1
 
-let jobs =
-    ranges
-    |> Array.map (fun (first, last) ->
-        Task.Run(fun () ->
-            let count = [ first .. last ] |> List.filter isPrime |> List.length
-            first, last, count))
+let tasks = paths |> Array.map (fun path -> Task.Run(fun () -> summarize path))
+let results = Task.WhenAll(tasks).GetAwaiter().GetResult()
+let mutable failed = false
+for result in results do
+    match result with
+    | Ok summary -> printfn "%s" summary
+    | Error message ->
+        failed <- true
+        eprintfn "%s" message
 
-let results = jobs |> Array.map (fun job -> job.Result)
-results |> Array.iter (fun (first, last, count) ->
-    printfn "Диапазон %d-%d: простых чисел: %d" first last count)
-
-printfn "Всего простых чисел: %d" (results |> Array.sumBy (fun (_, _, count) -> count))
+if failed then exit 1
